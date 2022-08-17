@@ -1,16 +1,30 @@
 package vitals;
 
+import vitals.config.ChargeRateConfig;
+import vitals.config.SOCConfig;
+import vitals.config.TempConfig;
+import vitals.language.AlertLanguage;
+
 public class BatteryManagementSystem {
-    static boolean batteryIsOk(float temperature, float soc, float chargeRate, BatteryHealth batteryHealth) {
-        return batteryHealth.isOutOfRange(temperature, soc, chargeRate);
+
+    static boolean isBatteryOk(float value, BatteryFactors batteryFactor, AlertLanguage alertLanguage) {
+        if(batteryFactor==BatteryFactors.TEMPERATURE){
+            return new TempConfig().isBatteryOk(value, alertLanguage);
+        }else if(batteryFactor==BatteryFactors.CHARGE_STATE){
+            return new SOCConfig().isBatteryOk(value,alertLanguage );
+        }else {
+            return new ChargeRateConfig().isBatteryOk(value,alertLanguage );
+        }
     }
 
     public static void main(String[] args) {
-        assert (batteryIsOk(25, 70, 0.7f, BatteryHealthFactor.valueOf("TEMPERATURE")) == true);
-        assert (batteryIsOk(50, 85, 0.0f, BatteryHealthFactor.valueOf("TEMPERATURE")) == false);
-        assert (batteryIsOk(25, 70, 0.7f, BatteryHealthFactor.valueOf("CHARGE_STATE")) == true);
-        assert (batteryIsOk(25, 85, 0.0f, BatteryHealthFactor.valueOf("CHARGE_STATE")) == false);
-        assert (batteryIsOk(25, 70, 0.9f, BatteryHealthFactor.valueOf("CHARGE_RATE")) == false);
+        assert (isBatteryOk(25,  BatteryFactors.TEMPERATURE,AlertLanguage.ENGLISH) == true);
+        assert (isBatteryOk(50,  BatteryFactors.TEMPERATURE,AlertLanguage.GERMAN) == false);
+        assert (isBatteryOk(70,  BatteryFactors.CHARGE_STATE,AlertLanguage.GERMAN) == true);
+        assert (isBatteryOk(85,  BatteryFactors.CHARGE_STATE,AlertLanguage.NONE) == false);
+        assert (isBatteryOk(0.9f, BatteryFactors.CHARGE_RATE,AlertLanguage.ENGLISH) == false);
+
+
         System.out.println("Battery Condition tested");
     }
 }
